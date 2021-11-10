@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script src="./echart.js"></script> -->
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.0/dist/echarts.js"></script>
+</head>
+<style>
+    #main,
+    html,
+    body {
+        width: 98%;
+    }
+</style>
+
+<body>
+<div id="app">
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width:80%;height:430px;"></div>
+    <div style="margin-top: 10px;display: inline-block">
+        <el-button type="primary" @click="queryArea(5)">查询前五地区来源</el-button>
+        <el-button type="primary" @click="queryArea(10)">查询前十地区来源</el-button>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript">
+
+    new Vue({
+        el:"#app",
+        data:{
+            limit:'6',
+        },
+        methods:{
+            queryArea(lim){
+                //定义数组
+                let arr = new Array();
+                var a = 0;
+                a++;
+                url="selectByAreaDesc"
+                console.log("开始定时获取数据");
+                //axios提交请求
+                axios.post(url,"limit="+lim).then(resp=>{
+                    console.log(resp)
+                    console.log(a)
+                    arr = []
+                    for (var i = 0; i < resp.data.data.length; i++) {
+                        arr.push(resp.data.data[i])
+                    }
+                    option.dataset.source = arr;
+                    // console.log(arr);
+                    console.log(option.dataset.source);
+                    myChart.setOption(option);
+                })
+            }
+        }
+    });
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'dark');
+    window.onresize = function () {
+        myChart.resize();
+    }
+
+    // 指定图表的配置项和数据
+    var option = {
+        dataset: {
+            source: [
+                //第一行是维度
+                // ['bookID', 'bookID', 'bookName'],
+                // [89.3, 58212, 'Matcha Latte'],
+            ]
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+        },
+        xAxis: {},
+        yAxis: { type: 'category' },
+        series: [
+            {
+                type: 'bar',
+                encode: {
+                    // 将 "amount" 列映射到 X 轴。
+                    x: 'sums',
+                    // 将 "product" 列映射到 Y 轴。
+                    y: 'address'
+                }
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+
+    //定义数组
+    let arr = new Array();
+    var a = 0;
+    let timeset = setInterval(function () {
+        a++;
+        let limAuto=6;
+        console.log("开始定时获取数据");
+        //axios提交请求
+        axios.post("selectByAreaDesc","limit="+limAuto).then(resp=>{
+            console.log(resp)
+            console.log(a)
+            if (a == 1) {
+                clearInterval(timeset)
+            }
+            arr = []
+            for (var i = 0; i < resp.data.data.length; i++) {
+                arr.push(resp.data.data[i])
+            }
+            option.dataset.source = arr;
+            // console.log(arr);
+            console.log(option.dataset.source);
+            myChart.setOption(option);
+        })
+        // $.ajax({
+        //     url: 'selectByAreaDesc',
+        //     type: 'GET',
+        //     success: function (resp) {
+        //
+        //         console.log(a)
+        //         if (a == 1) {
+        //             clearInterval(timeset)
+        //         }
+        //         arr = []
+        //         for (var i = 0; i < resp.data.length; i++) {
+        //             arr.push(resp.data[i])
+        //         }
+        //         option.dataset.source = arr;
+        //         // console.log(arr);
+        //         console.log(option.dataset.source);
+        //         myChart.setOption(option);
+        //     }
+        // })
+    }, 500);
+</script>
+
+</html>

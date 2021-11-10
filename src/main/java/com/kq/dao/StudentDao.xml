@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kq.dao.StudentDao">
+
+<!--    新增学生信息-->
+    <insert id="addStu" parameterType="student">
+        insert into SystemPro.student_tb
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="number!=null">`number`,</if>
+            <if test="name!=null">`name`,</if>
+            <if test="birthday!=null">birthday,</if>
+            <if test="shot!=null">shot,</if>
+            <if test="address!=null">address,</if>
+            <if test="clazzId!=null">clazzId,</if>
+            <if test="lastUpdate!=null">lastUpdate,</if>
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="number!=null">#{number},</if>
+            <if test="name!=null">#{name},</if>
+            <if test="birthday!=null">#{birthday},</if>
+            <if test="shot!=null">#{shot},</if>
+            <if test="address!=null">#{address},</if>
+            <if test="clazzId!=null">#{clazzId},</if>
+            <if test="lastUpdate!=null">#{lastUpdate},</if>
+        </trim>
+    </insert>
+<!--    更新学生信息-->
+    <update id="updateStu" parameterType="student">
+        update SystemPro.student_tb
+        <set>
+            <if test="number!=null">number=#{number},</if>
+            <if test="name!=null">`name`=#{name},</if>
+            <if test="birthday!=null">birthday=#{birthday},</if>
+            <if test="address!=null">address=#{address},</if>
+        </set>
+        where `number`=#{number}
+    </update>
+
+<!--    查询数据(0,1,2)-->
+    <select id="selectByShot" resultType="student">
+        select s.number,s.`name`,s.shot,c.clazzName,s.lastUpdate
+        from SystemPro.student_tb s, SystemPro.clasz_tb c
+        where clazzId = c.Id
+    </select>
+<!--    更新数据-->
+    <update id="updateShot" parameterType="student">
+        update SystemPro.student_tb
+        set lastUpdate=#{lastUpdate},shot=#{shot}
+        where number=#{number}
+    </update>
+
+<!--    地区数据分析-->
+    <select id="selectByArea" resultType="area">
+        SELECT address,count(address) as sums FROM SystemPro.student_tb where address like '%市%'  GROUP BY address;
+    </select>
+<!--    地区数据排序分析-->
+    <select id="selectByAreaDesc" resultType="area">
+#         where address like '%市%'
+SELECT * from  (
+    SELECT SUBSTRING_INDEX(CONCAT(SUBSTRING_INDEX(address,'市',1),'市'),'省',-1) as address,count(address) as sums
+    FROM SystemPro.student_tb
+    GROUP BY SUBSTRING_INDEX(CONCAT(SUBSTRING_INDEX(address,'市',1),'市'),'省',-1)
+    ORDER BY count(address) DESC LIMIT #{limit} ) a ORDER BY sums
+    </select>
+    
+<!--    分配班级-->
+    <select id="queryClazz" resultType="int">
+        select id from SystemPro.clasz_tb
+    </select>
+
+<!--    姓名模糊查询-->
+    <select id="querySearch" resultType="student">
+        select s.number,s.`name`,s.shot,c.clazzName,s.lastUpdate
+        from SystemPro.student_tb s, SystemPro.clasz_tb c
+        where clazzId = c.Id and s.`name` like concat('%',#{name},'%')
+    </select>
+
+
+</mapper>

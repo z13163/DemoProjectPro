@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kq.dao.Analyse">
+
+<!--    查询数据-->
+    <select id="queryAllSum" resultType="sum">
+        SELECT shot as `name`,count(shot) as `value` FROM SystemPro.student_tb GROUP BY shot
+    </select>
+<!--    查询教师数据-->
+    <select id="queryAllTeacher" resultType="sum">
+        SELECT shot as `name`,COUNT(shot) as `value` FROM SystemPro.`teacher_tb` GROUP BY shot
+    </select>
+</mapper>

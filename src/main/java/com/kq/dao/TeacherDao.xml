@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kq.dao.TeacherDao">
+
+<!--    查询教师信息-->
+    <select id="queryAllTeacher" resultType="teacher">
+        select t.id,t.`name`,t.sex,t.shot,t.birthday,c.clazzName
+        from SystemPro.teacher_tb t,SystemPro.clasz_tb c
+        where t.clazzId = c.teacherId
+        ORDER BY id asc
+    </select>
+<!--    查询教师接种信息-->
+    <select id="queryByShot" resultMap="ShotMap">
+        select t.id,t.`name`,t.shot,t.lastUpdate
+        from SystemPro.teacher_tb t
+    </select>
+    <resultMap id="ShotMap" type="teacher">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="shot" column="shot"/>
+        <result column="clazzName" property="clazzName"/>
+
+    </resultMap>
+<!--    查询各班信息-->
+    <select id="queryClazzCondition" resultMap="TeacherMap">
+        SELECT clazzId                 as id,
+               clazzName,
+               SUM(IF(shot = <if test="shot!=null">#{shot}</if>, 1, 0)) as CountNumber,
+               count(1)                as ClazzNumberCount
+        from SystemPro.student_tb,
+             SystemPro.clasz_tb
+        where clazzId = Id
+        GROUP BY clazzId
+    </select>
+    <resultMap id="TeacherMap" type="teacher">
+        <result column="id" property="id"/>
+        <result column="CountNumber" property="CountNumber"/>
+        <result column="ClazzNumberCount" property="ClazzNumberCount"/>
+        <collection property="student" ofType="student">
+            <result column="clazzName" property="clazzName"/>
+            <result column="shot" property="shot"/>
+        </collection>
+    </resultMap>
+
+
+<!--    添加教师-->
+    <insert id="AddTeacher" parameterType="teacher">
+        insert into SystemPro.teacher_tb
+            <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id!=null">`id`,</if>
+                <if test="name!=null">`name`,</if>
+                <if test="sex!=null">`sex`,</if>
+                <if test="birthday!=null">`birthday`,</if>
+                <if test="clazzId!=null">`clazzId`,</if>
+                <if test="shot!=null">`shot`,</if>
+            </trim>
+            <trim prefix="values(" suffix=")" suffixOverrides=",">
+                <if test="id!=null">#{id},</if>
+                <if test="name!=null">#{name},</if>
+                <if test="sex!=null">#{sex},</if>
+                <if test="birthday!=null">#{birthday},</if>
+                <if test="clazzId!=null">#{clazzId},</if>
+                <if test="shot!=null">#{shot},</if>
+            </trim>
+    </insert>
+
+<!--    更新教师信息-->
+    <update id="UpdateTeacher" parameterType="teacher">
+        update SystemPro.teacher_tb
+            <set>
+                <if test="name!=null">`name`=#{name},</if>
+                <if test="birthday!=null">birthday=#{birthday},</if>
+                <if test="lastUpdate!=null">lastUpdate=#{lastUpdate},</if>
+                <if test="sex!=null">sex=#{sex},</if>
+                <if test="shot!=null">shot=#{shot},</if>
+            </set>
+            where id=#{id}
+    </update>
+</mapper>

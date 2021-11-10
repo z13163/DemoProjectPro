@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理系统</title>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <script src="../js/axios-0.18.0.js"></script>
+</head>
+
+<body>
+    <div id="div">
+                <b style="color: #409eff; font-size: 20px;">教师信息</b>
+<!--        <div style="float: right;">-->
+<!--            <el-upload class="upload-demo" ref="upload" :limit="1" :before-upload="beforeUpload"-->
+<!--                :on-success="handleSuccess" :on-error="handleError" action="upload">-->
+<!--                <el-button type="primary" @click="addStu">导入今天的学生签到信息<i class="el-icon-upload el-icon&#45;&#45;right"></i>-->
+<!--                </el-button>-->
+
+<!--            </el-upload>-->
+<!--            <div style="font-size: 13px;margin-top: 10px;margin-bottom: 10px;" v-if="this.isUploadSuccess===1">-->
+<!--                <i class="el-icon-info" style="color: #3bd10a;"></i>-->
+<!--                <span style="color: #3bd10a; padding-left:10px">导入成功</span>-->
+<!--            </div>-->
+<!--            <div style="font-size: 13px;margin-top: 10px;margin-bottom: 10px;" v-if="this.isUploadSuccess===2">-->
+<!--                <i class="el-icon-info" style="color: red;"></i>-->
+<!--                <span style="color: red; padding-left:10px">导入失败，请重新上传</span>-->
+<!--            </div>-->
+
+<!--        </div>-->
+<!--        <div style="padding-left:200px;width:400px">-->
+<!--            <el-upload style="width:100px;" class="upload-demo" ref="upload" :limit="1" :before-upload="beforeUpload"-->
+<!--                :on-success="handleSuccess" :on-error="handleError" action="upload">-->
+<!--                &lt;!&ndash;                <el-button size="primary" type="primary">导入号码</el-button>&ndash;&gt;-->
+
+<!--            </el-upload>-->
+<!--            <div style="font-size: 13px;margin-top: 10px;margin-bottom: 10px;" v-if="this.isUploadSuccess===1">-->
+<!--                <i class="el-icon-info" style="color: #3bd10a;"></i>-->
+<!--                <span style="color: #3bd10a; padding-left:10px">导入成功</span>-->
+<!--            </div>-->
+<!--            <div style="font-size: 13px;margin-top: 10px;margin-bottom: 10px;" v-if="this.isUploadSuccess===2">-->
+<!--                <i class="el-icon-info" style="color: red;"></i>-->
+<!--                <span style="color: red; padding-left:10px">导入失败，请重新上传</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <!-- 数据展现表格 -->
+        <el-table v-loading="loading" :data="tableData">
+            <el-table-column align="center" prop="id" label="工号" width="130">
+            </el-table-column>
+            <el-table-column prop="name" label="姓名" width="130">
+            </el-table-column>
+            <el-table-column prop="shot" label="接种情况" width="150">
+            </el-table-column>
+<!--            <el-table-column prop="clazzName" label="所在班级">-->
+<!--            </el-table-column>-->
+            <el-table-column prop="lastUpdate" label="最后更新时间">
+            </el-table-column>
+            <el-table-column label="操作" width="180">
+                <template slot-scope="props">
+                    <el-button type="warning" @click="showEditStu(props.row)"><i class="el-icon-edit">更新</i></el-button>
+                </template>
+            </el-table-column>
+            </el-table-column>
+        </el-table>
+        <el-dialog title="编辑教师信息" :visible.sync="dialogTableVisible4edit"  top="6vh"
+            @close="resetForm('editForm')">
+            <!--
+                :model="formData": 关联数据
+                :rules: 关联校验规则
+                ref： 在获取表单对象时使用
+            -->
+            <el-form :model="editFormData" :rules="rules" ref="editForm" label-width="180px" class="demo-ruleForm">
+                <el-form-item label="教师工号" prop="id">
+                    <el-input v-model="editFormData.id" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="教师姓名" prop="name">
+                    <el-input v-model="editFormData.name" :disabled="true"></el-input>
+                </el-form-item>
+                <el-form-item label="接种针数" prop="shot">
+                    <el-select v-model="value4" @change="SelectValue(value4)" clearable placeholder="请选择"
+                        style="width:100%">
+                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item align="right">
+                    <el-button type="warning" @click="updateStu()">更新</el-button>
+                </el-form-item>
+            </el-form>
+        </el-dialog>
+
+        <!--
+        分页组件
+          @size-change： 当改变每页条数时触发的函数
+          @current-change：当改变页码时触发的函数
+          current-page ：默认的页码
+          :page-sizes：每页条数选择框中显示的值
+          :page-size : 默认的每页条数
+          layout： 分页组件的布局
+              total（总条数）, sizes(每页条数), prev（上一页）, pager(所有的页码), next(下一页), jumper（跳转页码）
+          :total: 总条数
+    -->
+
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange"
+            :current-page="pagination.currentPage" :page-sizes="[3,5,8]" :page-size="pagination.pageSize"
+            layout="total, sizes, prev, pager, next, jumper" :total="pagination.total">
+        </el-pagination>
+        
+
+    </div>
+</body>
+<script>
+    new Vue({
+        el: "#div",
+        data: {
+            loading:false,
+            dialogTableVisible4edit: false,
+            formData: {},//添加表单的数据
+            editFormData: {},//编辑表单的数据
+            tableData: [],//表格数据
+            pagination: {
+                currentPage: 1, //当前页
+                pageSize: 5,    //每页显示条数
+                total: 0        //总条数
+            },
+            rules: {
+                number: [
+                    { required: true, message: '请输入学号', trigger: 'blur' },
+                    { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+                ],
+                name: [
+                    { required: true, message: '请输入姓名', trigger: 'blur' },
+                    { min: 2, max: 10, message: '长度在 2 到 10 个字符', trigger: 'blur' }
+                ],
+            },
+            options: [{
+                value: '0',
+                label: '0'
+            }, {
+                value: '1',
+                label: '1'
+            }, {
+                value: '2',
+                label: '2'
+            }],
+            value4: ''
+        },
+
+        methods: {
+            //分页查询功能
+            selectByPage() {
+                this.loading = true
+                //                    selectByPage：分页查询                    currentPage：当前页面                                                                                                               总页数
+                axios.post("queryByTeacherShot", "method=selectByPage&currentPage=" + this.pagination.currentPage + "&pageSize=" + this.pagination.pageSize)
+                    .then(resp => {
+                        console.log(resp.data)
+                        for (let i = 0; i < resp.data.data.list.length; i++) {
+                            // resp.data.list[i].birthday = new Date(resp.data.list[i].birthday);
+                            resp.data.data.list[i].shot = "已接种" + resp.data.data.list[i].shot + "针";
+
+                            resp.data.data.list[i].lastUpdate = this.timestampToTime(resp.data.data.list[i].lastUpdate)
+                        }
+                        //将查询出的数据赋值tableData
+                        this.tableData = resp.data.data.list;
+                        this.loading = false;
+                        //设置分页参数
+                        //当前页
+                        this.pagination.currentPage = resp.data.data.pageNum;
+                        //总条数
+                        this.pagination.total = resp.data.data.total;
+                    })
+            },
+            //改变每页条数时执行的函数
+            handleSizeChange(pageSize) {
+                //修改分页查询的参数
+                this.pagination.pageSize = pageSize;
+                //重新执行查询
+                this.selectByPage();
+            },
+            //改变页码时执行的函数
+            handleCurrentChange(pageNum) {
+                //修改分页查询的参数
+                this.pagination.currentPage = pageNum;
+                //重新执行查询
+                this.selectByPage();
+            },
+            timestampToTime(timestamp) {
+                let date = new Date(timestamp)
+                let Y = date.getFullYear() + '-'
+                let M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-'
+                let D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '  '
+                let h = (date.getHours() < 10 ? '0' + (date.getHours()) : date.getHours()) + ':';
+                let m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':';
+                let s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds());
+                return Y + M + D + h + m + s;
+            },
+            resetForm(addForm) {
+                //双向绑定，输入的数据都赋值给了formData， 清空formData数据
+                this.formData = {};
+                //清除表单的校验数据
+                this.$refs[addForm].resetFields();
+            },
+            showEditStu(row) {
+                //1. 弹出窗口
+                this.dialogTableVisible4edit = true;
+                //2. 显示表单数据
+                this.editFormData = {
+                    id: row.id,
+                    name: row.name,
+                    shot: row.shot,
+                    address: row.address,
+                }
+                console.log(this.editFormData.birthday)
+            },
+
+            resetForm(addForm) {
+                //双向绑定，输入的数据都赋值给了formData， 清空formData数据
+                this.formData = {};
+                //清除表单的校验数据
+                this.$refs[addForm].resetFields();
+            },
+            SelectValue(value) {
+                this.value4 = value
+            },
+            //修改数据功能
+            updateStu(row) {
+                let param = "method=updateTeaShot&id=" + this.editFormData.id + "&currentPage=" + this.pagination.currentPage + "&pageSize=" + this.pagination.pageSize + "&shot=" + this.value4;
+                axios.post("queryByTeacherShot", param)
+                    .then(resp => {
+                        if(resp.data.code==0) {
+                            this.$message({
+                                message: resp.data.msg,
+                                type: 'success',
+                                center: true
+                            });
+                        }
+                        console.log("更新返回")
+                        console.log(resp.data)
+                        for (let i = 0; i < resp.data.data.list.length; i++) {
+                            // resp.data.list[i].birthday = new Date(resp.data.list[i].birthday);
+                            resp.data.data.list[i].shot = "已接种" + resp.data.data.list[i].shot + "针";
+                            resp.data.data.list[i].lastUpdate = this.timestampToTime(resp.data.data.list[i].lastUpdate)
+                        }
+                        //将查询出的数据赋值tableData
+                        this.tableData = resp.data.data.list;
+                        //设置分页参数
+                        //当前页
+                        this.pagination.currentPage = resp.data.data.pageNum;
+                        //总条数
+                        this.pagination.total = resp.data.data.total;
+                    })
+                //关闭编辑窗口
+                this.dialogTableVisible4edit = false;
+            },
+        },
+        mounted() {
+            //调用分页查询功能
+            this.selectByPage();
+        }
+    });
+</script>
+
+</html>

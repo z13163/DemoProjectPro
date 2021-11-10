@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+<!--    <properties resource="config.properties"/>
+    &lt;!&ndash;    取别名方便接口使用&ndash;&gt;
+    <typeAliases>
+        <package name="com.kq.pojo"/>
+    </typeAliases>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+        </environment>
+    </environments>-->
+    <settings>
+        <setting name="logImpl" value="log4j"/>
+    </settings>
+    <typeAliases>
+        <package name="com.kq.pojo"/>
+    </typeAliases>
+    <!--    每一个Mapper都需要在核心配置中注册-->
+<!--    <mappers>-->
+<!--        <package name="com/kq/mapper"/>-->
+<!--&lt;!&ndash;        <mapper package="com/kq/mapper/UserMapper.xml"/>&ndash;&gt;-->
+<!--    </mappers>-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"/>
+    </plugins>
+    <mappers>
+        <package name="com.kq.dao"/>
+    </mappers>
+</configuration>

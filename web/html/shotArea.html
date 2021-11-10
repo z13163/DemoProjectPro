@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <script src="./echart.js"></script> -->
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.0/dist/echarts.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<style>
+    #main,
+    html,
+    body {
+        width: 98%;
+    }
+</style>
+
+<body>
+
+<div id="app">
+
+    <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+    <div id="main" style="width:80%;height:430px;"></div>
+    <div style="margin-top: 10px;display: inline-block">
+        <el-button type="primary" @click="sele(0)">查询学生</el-button>
+        <el-button type="primary" @click="sele(1)">查询教师</el-button>
+    </div>
+
+</div>
+
+</body>
+<script type="text/javascript">
+
+    new Vue({
+       el:"#app",
+        methods:{
+           sele(type){
+               //定义数组
+               console.log(type)
+               var ur;
+               console.log(type==0)
+               if (type == 0) {
+                   ur = 'queryAllSum'
+               } else {
+                   ur = 'queryAllTeacherSum'
+               }
+               var a = 0;
+                   a++;
+                   $.ajax({
+                       url: ur,
+                       type: 'GET',
+                       success: function (resp) {
+                           console.log(resp.data)
+                           var data = []
+                           for (var i = 0; i < resp.data.length; i++) {
+                               resp.data[i].name="已接种"+resp.data[i].name+"针";
+                               // resp.data[i].value=resp.data[i].value+"人"
+                               data.push(resp.data[i])
+                           }
+                           console.log(data)
+                           option.series[0].data=data
+                           // option.series[data] = data;
+                           console.log(option.series)
+                           // console.log(arr);
+                           // console.log(option.dataset.source);
+                           myChart.setOption(option);
+                       }
+                   })
+           }
+        }
+    });
+
+
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'dark');
+    window.onresize = function () {
+        myChart.resize();
+    }
+
+    // 指定图表的配置项和数据
+    var option = {
+        title: {
+            text: '信息',
+            left: 'center',
+            top: 'center'
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        dataset: {
+            source: [
+                //第一行是维度
+                // ['bookID', 'bookID', 'bookName'],
+                // [89.3, 58212, 'Matcha Latte'],
+            ]
+        },
+        legend: {
+            orient: 'vertical',
+            x: 'left',
+            data: ['已接种0针', '已接种1针', '已接种2针']
+        },
+        series: [
+            {
+                type: 'pie',
+
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                // label: {
+                //     show: false,
+                //     position: 'center',
+                //     // emphasis: {
+                //     //     show: true
+                //     // }
+                // },
+                // labelLine: {
+                //     show: false
+                // },
+                emphasis: {
+                    // label: {
+                    //     show: true,
+                    //     fontSize: '30',
+                    //     fontWeight: 'bold'
+                    //
+                    // },
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                },
+                data: [
+                    {
+                        value: 335,
+                        name: 'A'
+                    },
+                    {
+                        value: 234,
+                        name: 'B'
+                    },
+                    {
+                        value: 1548,
+                        name: 'C'
+                    }
+                ],
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+
+    //定义数组
+    let arr = new Array();
+    var a = 0;
+    let timeset = setInterval(function () {
+        a++;
+        console.log("开始定时获取数据");
+        $.ajax({
+            url: 'queryAllSum',
+            type: 'GET',
+            success: function (resp) {
+                console.log(resp.data)
+                console.log(a)
+                if (a == 1) {
+                    clearInterval(timeset)
+                }
+                var data = []
+                for (var i = 0; i < resp.data.length; i++) {
+                    console.log(resp.data[i].name)
+                    resp.data[i].name="已接种"+resp.data[i].name+"针";
+                    // resp.data[i].value=resp.data[i].value+"人"
+                    data.push(resp.data[i])
+                }
+                console.log(data)
+                option.series[0].data=data
+                // option.series[data] = data;
+                console.log(option.series)
+                // console.log(arr);
+                // console.log(option.dataset.source);
+                myChart.setOption(option);
+            }
+        })
+    }, 500);
+</script>
+
+</html>

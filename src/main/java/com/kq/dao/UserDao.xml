@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kq.dao.UserDao">
+<!--    用户注册-->
+    <insert id="addUser" parameterType="user">
+        insert into SystemPro.user_tb
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="id!=null">
+                #{id},
+            </if>
+            <if test="username!=null">
+                #{username},
+            </if>
+            <if test="password!=null">
+                #{password},
+            </if>
+            <if test="birthday!=null">
+                #{birthday},
+            </if>
+            <if test="age!=null">
+                #{age},
+            </if>
+            <if test="type!=null">
+                #{type}
+            </if>
+        </trim>
+    </insert>
+
+<!--    用户登录-->
+    <select id="Login" parameterType="user" resultType="user">
+        select * from SystemPro.user_tb
+        where username=#{user.username} and password=#{user.password} and type=1
+    </select>
+<!--    用户名校验-->
+    <select id="CheckUserName" parameterType="user" resultType="user">
+        select * from SystemPro.user_tb where username=#{username}
+    </select>
+
+<!--    修改用户密码-->
+    <update id="updatePassword" parameterType="user">
+        update SystemPro.user_tb
+            <set>
+                <if test="password!=null">password=#{password}</if>
+            </set>
+        where id=#{id}
+    </update>
+
+<!--    获取用户列表-->
+    <select id="getUserList" resultType="user">
+        select id,username,age,birthday from SystemPro.user_tb where type=0
+    </select>
+
+<!--    获取待处理数量-->
+    <select id="getThings" resultType="int">
+        select count(1) from SystemPro.user_tb where type=0
+    </select>
+
+<!--    更新Type-->
+    <update id="updateType" parameterType="_int">
+        update SystemPro.user_tb set type = #{type} where id=#{id}
+    </update>
+</mapper>
