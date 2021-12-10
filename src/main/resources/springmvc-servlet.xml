@@ -33,7 +33,7 @@
     <!-- 静态资源默认servlet配置 -->
     <!-- MVC不处理静态资源css js 等-->
     <mvc:default-servlet-handler/>
-<!--    不过滤-->
+    <!-- 不过滤-->
     <mvc:resources mapping="/html/**" location="/html/"/>
     <!-- 配置返回视图路径(视图解析器) -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
